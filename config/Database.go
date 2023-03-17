@@ -2,7 +2,6 @@ package config
 
 import (
 	"Product/app/Models"
-	"os"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jinzhu/gorm"
@@ -29,12 +28,12 @@ func Init() *gorm.DB {
 func connectionMap() config {
 
 	conf := config{
-		db_connection: os.Getenv("DB_CONNECTION"),
-		db_name:       os.Getenv("DB_NAME"),
-		db_host:       os.Getenv("DB_HOST"),
-		db_port:       os.Getenv("DB_PORT"),
-		db_username:   os.Getenv("DB_USERNAME"),
-		db_password:   os.Getenv("DB_PASSWORD"),
+		db_connection: "root",
+		db_name:       "railway",
+		db_host:       "containers-us-west-17.railway.app",
+		db_port:       "7059",
+		db_username:   "root",
+		db_password:   "xUKdpIqo3UZ7NiTy7lao",
 	}
 
 	return conf
