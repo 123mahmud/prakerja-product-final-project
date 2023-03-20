@@ -3,34 +3,41 @@ package ProductController
 import (
 	"Product/app/Models"
 	DB "Product/config"
-	"fmt"
 	"net/http"
 	"strconv"
 
 	"github.com/labstack/echo/v4"
 )
 
-var products []Models.Products
-
 func Index(c echo.Context) error {
+	var products []Models.Products
 	results := DB.Init().Find(&products)
-	fmt.Println(results.Error)
+	if err := results.Error; err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"data":    products,
+		"message": "success products get ",
+	})
+
+	// return c.JSON(http.StatusOK, products)
+}
+
+func Show(c echo.Context) error {
+	id := c.Param("id")
+
+	var products []Models.Products // definisi variabel products
+
+	results := DB.Init().Find(&products, id)
 	if err := results.Error; err != nil {
 		return echo.NewHTTPError(http.StatusNotFound, err.Error())
 	}
 
-	return c.JSON(http.StatusOK, products)
-}
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"data":    products,
+		"message": "success products show ",
+	})
 
-func Show(c echo.Context) error {
-
-	id := c.Param("id")
-	product := DB.Init().Find(&Models.Products{}, id)
-	if err := product.Error; err != nil {
-		return echo.NewHTTPError(http.StatusNotFound, err.Error())
-	}
-
-	return c.JSON(http.StatusOK, product)
 }
 
 func Store(c echo.Context) error {
@@ -77,7 +84,12 @@ func Store(c echo.Context) error {
 		return c.JSON(http.StatusNotFound, err.Error())
 	}
 
-	return c.JSON(http.StatusCreated, product)
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"data":    product,
+		"message": "success products store",
+	})
+
+	// return c.JSON(http.StatusCreated, product)
 }
 
 func Update(c echo.Context) error {
@@ -115,29 +127,44 @@ func Update(c echo.Context) error {
 		})
 	}
 
-	product := DB.Init().Find(&Models.Products{}, id)
-	if err := product.Error; err != nil {
-		return echo.NewHTTPError(http.StatusNotFound, err.Error())
+	product := &Models.Products{}
+	results := DB.Init().First(product, id)
+	if results.RecordNotFound() {
+		return echo.NewHTTPError(http.StatusNotFound, "product not found")
+	} else if results.Error != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, results.Error.Error())
 	}
 
-	product.Update(Models.Products{
-		Name:        name,
-		Price:       price_int,
-		Description: description,
-	})
+	product.Name = name
+	product.Price = price_int
+	product.Description = description
 
-	return c.JSON(http.StatusOK, product)
+	results = DB.Init().Save(product)
+	if results.Error != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, results.Error.Error())
+	}
+
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"data":    product,
+		"message": "success product update",
+	})
 }
 
 func Delete(c echo.Context) error {
-
 	id := c.Param("id")
-	product := DB.Init().Find(&Models.Products{}, id)
-	if err := product.Error; err != nil {
+	product := &Models.Products{}
+	result := DB.Init().Find(product, id)
+	if err := result.Error; err != nil {
 		return echo.NewHTTPError(http.StatusNotFound, err.Error())
 	}
 
-	DB.Init().Delete(&Models.Products{}, id)
+	err := DB.Init().Delete(product, id).Error
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
 
-	return c.JSON(http.StatusOK, product)
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"data":    product,
+		"message": "success products destroy",
+	})
 }
