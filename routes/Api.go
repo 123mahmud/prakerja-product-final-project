@@ -18,9 +18,9 @@ func Api() {
 	e.DELETE("products/:id", ProductController.Delete)
 
 	port := os.Getenv("APP_PORT")
-	if port == "" {
-		port = "8080"
-	}
+	// if port == "" {
+	// 	port = "8080"
+	// }
 
 	e.Logger.Fatal(e.Start(":" + port))
 }
