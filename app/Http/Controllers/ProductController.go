@@ -26,15 +26,14 @@ func Index(c echo.Context) error {
 func Show(c echo.Context) error {
 	id := c.Param("id")
 
-	var products []Models.Products // definisi variabel products
-
-	results := DB.Init().Find(&products, id)
-	if err := results.Error; err != nil {
+	product := &Models.Products{}
+	result := DB.Init().Find(product, id)
+	if err := result.Error; err != nil {
 		return echo.NewHTTPError(http.StatusNotFound, err.Error())
 	}
 
 	return c.JSON(http.StatusOK, map[string]interface{}{
-		"data":    products,
+		"data":    product,
 		"message": "success products show ",
 	})
 
