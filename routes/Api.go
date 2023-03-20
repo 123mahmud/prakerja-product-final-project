@@ -17,10 +17,10 @@ func Api() {
 	e.PUT("products/:id", ProductController.Update)
 	e.DELETE("products/:id", ProductController.Delete)
 
-	port := os.Getenv("APP_PORT")
-	// if port == "" {
-	// 	port = "8080"
-	// }
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
 
 	e.Logger.Fatal(e.Start(":" + port))
 }
